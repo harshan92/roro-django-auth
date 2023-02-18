@@ -3,6 +3,7 @@ from rest_framework import exceptions
 from rest_framework.response import Response
 from .serializer import UserSerializer
 from .models import User
+from .authentication import create_access_token, create_refresh_token
 
 class RegisterAPIView(APIView):
     def post(self, request):
@@ -28,6 +29,15 @@ class LoginAPIView(APIView):
         if not user.check_password(password):
             raise exceptions.AuthenticationFailed('Invalid credentials')
 
-        serializer=UserSerializer(user)
+        access_token=create_access_token(user.id)
+        refresh_token=create_refresh_token(user.id)
 
-        return Response(serializer.data)
+        response=Response()
+
+        response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+
+        response.data={
+            'token':access_token,
+        }
+
+        return response
