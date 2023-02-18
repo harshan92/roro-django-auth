@@ -48,7 +48,7 @@ class UserAPIView(APIView):
     def get(self, request):
        return Response(UserSerializer(request.user).data)
 
-class RefreshToken(APIView):
+class RefreshAPIView(APIView):
     def post(self, request):
         refresh_token=request.COOKIES.get('refresh_token')
         id=decode_refresh_token(refresh_token)
@@ -58,3 +58,14 @@ class RefreshToken(APIView):
         return Response({
             'token':access_token,
         })
+
+
+class LogoutAPIView(APIView):
+    def post(self, request):
+        response=Response()
+        response.delete_cookie(key='refresh_token')
+        response.data={
+            'message':'success',
+        }
+
+        return response
